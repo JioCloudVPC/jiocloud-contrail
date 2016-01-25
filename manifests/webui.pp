@@ -8,6 +8,8 @@
 #
 class contrail::webui (
   $package_ensure     = 'present',
+  $api_virtual_ip     = '127.0.0.1',
+  $discovery_virtual_ip = '127.0.0.1',
   $contrail_ip        = $::ipaddress,
   $webui_ip           = $::ipaddress,
   $config_ip          = $::ipaddress,

@@ -12,7 +12,7 @@ log_file=/var/log/contrail/contrail-api.log
 log_file_size=<%= @log_file_size %>
 log_level=<%= @log_level %>
 log_local=<%= @log_local %>
-disc_server_ip=<%= @config_ip %>
+disc_server_ip=<%= @discovery_virtual_ip %>
 disc_server_port=<%= @discovery_server_port %>
 zk_server_ip=<%= @zk_ip_list.map{ |ip| "#{ip}:#{@zk_port}" }.join(',') %>
 redis_server_ip=<%= @redis_ip %>
@@ -35,6 +35,7 @@ admin_user=<%= @keystone_admin_user %>
 admin_password=<%= @keystone_admin_password %>
 admin_token=<%= @keystone_admin_token %>
 admin_tenant_name=<%= @keystone_admin_tenant %>
+auth_url=<%= @keystone_auth_url %>
 <% if @keystone_insecure -%>
 insecure=<%= @keystone_insecure %>
 <% end -%>

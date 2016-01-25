@@ -46,6 +46,7 @@ Puppet::Type.type(:contrail_vrouter).provide(
       '--api_server_ip', resource[:api_server_address],
       '--api_server_port',resource[:api_server_port],
       '--host_name',resource[:name],
+      '--host_ip',resource[:host_address],
       '--oper del')
   end
 

@@ -62,6 +62,8 @@
 
 class contrail::vrouter (
   $discovery_address,
+  $keystone_admin_tenant,
+  $keystone_admin_user,
   $keystone_admin_password,
   $api_address                = undef,
   $api_port                   = 8082,
@@ -71,6 +73,7 @@ class contrail::vrouter (
   $manage_repo                = false,
   $vrouter_interface          = 'vhost0',
   $vrouter_physical_interface = 'eth0',
+  $interface_is_dhcp          = 'true',
   $vrouter_num_controllers    = 2,
   $vrouter_gw                 = undef,
   $metadata_proxy_secret      = 'set',
@@ -207,19 +210,48 @@ class contrail::vrouter (
     unless => "/sbin/ifconfig | grep ^${vrouter_physical_interface}",
   }
 
-  network_config { $vrouter_interface:
-    ensure  => present,
-    family  => 'inet',
-    method  => 'dhcp',
-    onboot  => true,
-    options => {
-                'pre-up' => "${vrouter_patch}/usr/local/bin/if-vhost0",
-                },
-  } ->
-  exec { "ifup_${vrouter_interface}":
-    command => "/sbin/ifup ${vrouter_interface}",
-    unless  => "/sbin/ifconfig | grep ^${vrouter_interface}",
-    require => Package[$package_names],
+  if $interface_is_dhcp {
+    network_config { $vrouter_interface:
+      ensure  => present,
+      family  => 'inet',
+      method  => 'dhcp',
+      onboot  => true,
+      options => {
+                  'pre-up' => "${vrouter_patch}/usr/local/bin/if-vhost0",
+                  },
+    } ->
+    exec { "ifup_${vrouter_interface}":
+      command => "/sbin/ifup ${vrouter_interface}",
+      unless  => "/sbin/ifconfig | grep ^${vrouter_interface}",
+      require => Package[$package_names],
+    }
+  }
+  else {
+    package {'ifupdown-extra':}
+    network_config { $vrouter_interface:
+      ensure  => present,
+      family  => 'inet',
+      method  => 'static',
+      ipaddress => $vrouter_ip,
+      netmask  => $vrouter_netmask,
+      onboot  => true,
+      options => {
+                  'pre-up' => "${vrouter_patch}/usr/local/bin/if-vhost0",
+                  },
+    } ->
+    network_route { 'default':
+      ensure => present,
+      gateway => $vrouter_gw_orig,
+      interface => $vrouter_interface,
+      netmask => '0.0.0.0',
+      network => 'default',
+      require => Package['ifupdown-extra']
+    } ->
+    exec { "ifup_${vrouter_interface}":
+      command => "/sbin/ifup ${vrouter_interface}",
+      unless  => "/sbin/ifconfig | grep ^${vrouter_interface}",
+      require => Package[$package_names],
+    }
   }
 
   # NOTE: below scripts are taken from contrail-vrouter-init package. It may
@@ -295,6 +327,7 @@ class contrail::vrouter (
       'VIRTUAL-HOST-INTERFACE/ip':                  value => "${vrouter_ip}/${vrouter_cidr}";
       'VIRTUAL-HOST-INTERFACE/gateway':             value => $vrouter_gw_orig;
       'VIRTUAL-HOST-INTERFACE/physical_interface':  value => $vrouter_physical_interface;
+      'VIRTUAL-HOST-INTERFACE/compute_node_address':value => $vrouter_ip;
     }
 
     if $metadata_proxy_secret {
@@ -338,6 +371,8 @@ class contrail::vrouter (
   contrail_vrouter {$::hostname:
     ensure             => present,
     host_address       => $vrouter_ip,
+    admin_tenant       => $keystone_admin_tenant,
+    admin_user         => $keystone_admin_user,
     admin_password     => $keystone_admin_password,
     api_server_address => $api_address_orig,
     require            => Service['contrail-vrouter-agent'],

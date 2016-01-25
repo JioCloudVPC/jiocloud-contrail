@@ -1,5 +1,5 @@
 [APISERVER]
-api_server_ip = <%= @config_ip %>
+api_server_ip = <%= @api_virtual_ip %>
 api_server_port = <%= @api_server_port %>
 multi_tenancy = <%= @multi_tenancy %>
 contrail_extensions = ipam:neutron_plugin_contrail.plugins.opencontrail.contrail_plugin_ipam.NeutronPluginContrailIpam,policy:neutron_plugin_contrail.plugins.opencontrail.contrail_plugin_policy.NeutronPluginContrailPolicy,route-table:neutron_plugin_contrail.plugins.opencontrail.contrail_plugin_vpc.NeutronPluginContrailVpc

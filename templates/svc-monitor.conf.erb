@@ -3,7 +3,7 @@ ifmap_server_ip=<%= @config_ip %>
 ifmap_server_port=<%= @ifmap_server_port %>
 ifmap_username=svc-monitor
 ifmap_password=svc-monitor
-api_server_ip=<%= @config_ip %>
+api_server_ip=<%= @api_virtual_ip %>
 api_server_port=<%= @api_server_port %>
 log_file=/var/log/contrail/contrail-svc-monitor.log
 log_file_size=<%= @log_file_size %>
@@ -11,7 +11,7 @@ log_level=<%= @log_level %>
 log_local=<%= @log_local %>
 zk_server_ip=<%= @zk_ip_list.map{ |ip| "#{ip}:#{@zk_port}" }.join(',') %>
 cassandra_server_list=<%= @cassandra_ip_list.map{ |ip| "#{ip}:#{@cassandra_port}" }.join(' ') %>
-disc_server_ip=<%= @config_ip %>
+disc_server_ip=<%= @discovery_virtual_ip %>
 disc_server_port=<%= @discovery_server_port %>
 region_name=<%= @keystone_region %>
 

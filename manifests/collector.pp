@@ -8,6 +8,8 @@
 #
 class contrail::collector (
   $package_ensure     = 'present',
+  $api_virtual_ip     = '127.0.0.1',
+  $discovery_virtual_ip = '127.0.0.1',
   $contrail_ip        = $::ipaddress,
   $collector_ip       = $::ipaddress,
   $config_ip          = $::ipaddress,
@@ -34,17 +36,6 @@ class contrail::collector (
     require => Package['contrail-analytics'],
   }
 
-  ##
-  # upstart links under init.d are not installed by the packages, so adding
-  # them.
-  ##
-
-  file {'/etc/init.d/contrail-analytics-api':
-    ensure  => link,
-    source  => '/lib/init/upstart-job',
-    require => Package['contrail-analytics'],
-  }
-
   service {'contrail-analytics-api':
     ensure    => 'running',
     enable    => true,
@@ -57,11 +48,6 @@ class contrail::collector (
     require => Package['contrail-analytics'],
   }
 
-  file {'/etc/init.d/contrail-collector':
-    ensure  => link,
-    source  => '/lib/init/upstart-job',
-    require => Package['contrail-analytics'],
-  }
 
   service {'contrail-collector':
     ensure    => 'running',
@@ -72,12 +58,6 @@ class contrail::collector (
   file { '/etc/contrail/contrail-query-engine.conf':
     ensure  => present,
     content => template("${module_name}/contrail-query-engine.conf.erb"),
-    require => Package['contrail-analytics'],
-  }
-
-  file {'/etc/init.d/contrail-query-engine':
-    ensure  => link,
-    source  => '/lib/init/upstart-job',
     require => Package['contrail-analytics'],
   }
 

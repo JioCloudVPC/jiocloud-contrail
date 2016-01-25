@@ -159,6 +159,7 @@ class contrail::config (
   $keystone_admin_token,
   $keystone_admin_password,
   $keystone_auth_password,
+  $keystone_auth_url,
   $edge_routers               = {},
   $keystone_host              = $::ipaddress,
   $nova_metadata_address      = $::ipaddress,
@@ -179,6 +180,7 @@ class contrail::config (
   $use_certs                  = false,
   $cassandra_ip_list          = [ $::ipaddress ],
   $cassandra_port             = 9160,
+  $api_virtual_ip             = '127.0.0.1',
   $api_listen                 = '0.0.0.0',
   $api_local_listen_port      = 9100,
   $api_server_port            = 8082,
@@ -191,6 +193,7 @@ class contrail::config (
   $rabbit_port                = 5672,
   $rabbit_user                = 'guest',
   $rabbit_password            = 'guest',
+  $discovery_virtual_ip       = '127.0.0.1',
   $discovery_listen           = '0.0.0.0',
   $discovery_local_listen_port= 9110,
   $discovery_server_port      = 5998,
@@ -356,7 +359,10 @@ class contrail::config (
   contrail_control {$::hostname:
     ensure         => present,
     host_address   => $contrail_ip,
+    admin_tenant   => $keystone_admin_tenant,
+    admin_user     => $keystone_admin_user,
     admin_password => $keystone_admin_password,
+    api_server_address  => $api_virtual_ip,
     require        => Service['contrail-api'],
   }
 
@@ -366,7 +372,10 @@ class contrail::config (
     # Provision edge routers. This is only need to be run on leader.
     ##
     $defaults = {
+      admin_tenant   => $keystone_admin_tenant,
+      admin_user     => $keystone_admin_user,
       admin_password => $keystone_admin_password,
+      api_server_address  => $api_virtual_ip,
       ensure         => present,
       require        => Service['contrail-api']
     }
@@ -379,7 +388,9 @@ class contrail::config (
     contrail_linklocal {'metadata':
       ensure                   => present,
       ipfabric_service_address => $nova_metadata_address,
+      api_server_address            => $api_virtual_ip,
       ipfabric_service_port    => $nova_metadata_port,
+      admin_user               => $keystone_admin_user,
       admin_password           => $keystone_admin_password,
       service_address          => '169.254.169.254',
       service_port             => 80,

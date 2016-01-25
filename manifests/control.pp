@@ -6,6 +6,8 @@ class contrail::control (
   $control_ip_list = [$::ipaddress],
   $config_ip       = $::ipaddress,
   $contrail_ip     = $::ipaddress,
+  $api_virtual_ip  = '127.0.0.1',
+  $discovery_virtual_ip = '127.0.0.1',
   $log_level       = 'SYS_INFO',
   $log_file_size   = 10737418240,
   $log_local       = 1,

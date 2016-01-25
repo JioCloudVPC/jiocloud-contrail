@@ -28,7 +28,7 @@ Puppet::Type.type(:contrail_fip_pool).provide(
   def create
     create_fip('--public_vn_name',resource[:network_fqname],'--floating_ip_pool_name',resource[:name],'--api_server_ip',resource[:api_server_address],'--api_server_port',resource[:api_server_port],'--admin_user',resource[:admin_user],'--admin_password',resource[:admin_password],'--admin_tenant',resource[:admin_tenant])
     resource[:tenants].each do |x|
-      use_fip('--project_name', "default-domain:#{x}", '--floating_ip_pool_name',"#{resource[:network_fqname]}:#{resource[:name]}")
+      use_fip('--project_name', "default-domain:#{x}", '--floating_ip_pool_name',"#{resource[:network_fqname]}:#{resource[:name]}", '--api_server_ip',resource[:api_server_address])
     end
   end
 
@@ -57,7 +57,7 @@ Puppet::Type.type(:contrail_fip_pool).provide(
       tenants_to_add = resource[:tenants]
     end
     tenants_to_add.each do |x|
-      use_fip('--project_name', "default-domain:#{x}", '--floating_ip_pool_name',"#{resource[:network_fqname]}:#{resource[:name]}")
+      use_fip('--project_name', "default-domain:#{x}", '--floating_ip_pool_name',"#{resource[:network_fqname]}:#{resource[:name]}", '--api_server_ip',"#{resource[:api_server_address]}")
     end
   end
 
