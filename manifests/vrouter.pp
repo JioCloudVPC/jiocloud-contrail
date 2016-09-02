@@ -131,10 +131,8 @@ class contrail::vrouter (
     $iface_for_vrouter_config = $vrouter_interface
   } elsif has_interface_with($vrouter_physical_interface) {
     $iface_for_vrouter_config = $vrouter_physical_interface
-    $vrouter_physical_interface_orig = $vrouter_physical_interface
   } elsif has_interface_with($vrouter_physical_interface_backup) {
     $iface_for_vrouter_config = $vrouter_physical_interface_backup
-    $vrouter_physical_interface_orig= $vrouter_physical_interface_backup
   } else {
     fail("vrouter_physical_interface (${vrouter_physical_interface}) , backup interface (${vrouter_physical_interface_backup})  and vrouter_interface (${vrouter_interface}) dont exist")
   }
