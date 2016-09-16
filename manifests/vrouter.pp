@@ -73,12 +73,14 @@ class contrail::vrouter (
   $manage_repo                = false,
   $vrouter_interface          = 'vhost0',
   $vrouter_physical_interface = 'eth0',
+  $vrouter_physical_interface_backup = undef,
   $interface_is_dhcp          = 'true',
   $vrouter_num_controllers    = 2,
   $vrouter_gw                 = undef,
   $metadata_proxy_secret      = 'set',
   $router_address             = undef,
   $network_mtu                = 1500,
+  $headless_mode              = false,
   $hypervisor_type            = 'kvm',
   $vgw_enabled                = false,
   $vgw_interface              = 'vgw1',
@@ -119,12 +121,22 @@ class contrail::vrouter (
     Apt::Source<||> -> Package<||>
   }
 
+  if has_interface_with($vrouter_physical_interface_backup) {
+    $vrouter_physical_interface_orig = $vrouter_physical_interface_backup
+  } elsif has_interface_with($vrouter_physical_interface) {
+    $vrouter_physical_interface_orig = $vrouter_physical_interface
+  }
+
   if has_interface_with($vrouter_interface) {
     $iface_for_vrouter_config = $vrouter_interface
   } elsif has_interface_with($vrouter_physical_interface) {
     $iface_for_vrouter_config = $vrouter_physical_interface
+    $vrouter_physical_interface_orig = $vrouter_physical_interface
+  } elsif has_interface_with($vrouter_physical_interface_backup) {
+    $iface_for_vrouter_config = $vrouter_physical_interface_backup
+    $vrouter_physical_interface_orig= $vrouter_physical_interface_backup
   } else {
-    fail("vrouter_physical_interface (${vrouter_physical_interface}) and vrouter_interface (${vrouter_interface}) dont exist")
+    fail("vrouter_physical_interface (${vrouter_physical_interface}) , backup interface (${vrouter_physical_interface_backup})  and vrouter_interface (${vrouter_interface}) dont exist")
   }
 
   ##
@@ -182,6 +194,7 @@ class contrail::vrouter (
     $vrouter_patch=''
   }
 
+  
   ensure_resource(package, "linux-headers-${::kernelrelease}")
 
   Package["linux-headers-${::kernelrelease}"] -> Package['contrail-vrouter-dkms']
@@ -193,10 +206,10 @@ class contrail::vrouter (
   ##
   # Setting up network interfaces
   ##
-  exec { "/sbin/ifdown ${vrouter_physical_interface}":
+  exec { "/sbin/ifdown ${vrouter_physical_interface_orig}":
     unless => "/bin/grep 'iface ${vrouter_interface}' /etc/network/interfaces",
   } ->
-  network_config { $vrouter_physical_interface:
+  network_config { $vrouter_physical_interface_orig:
     ensure  => present,
     family  => 'inet',
     method  => 'manual',
@@ -206,8 +219,8 @@ class contrail::vrouter (
                 },
     onboot  => true,
   } ->
-  exec { "/sbin/ifup ${vrouter_physical_interface}":
-    unless => "/sbin/ifconfig | grep ^${vrouter_physical_interface}",
+  exec { "/sbin/ifup ${vrouter_physical_interface_orig}":
+    unless => "/sbin/ifconfig | grep ^${vrouter_physical_interface_orig}",
   }
 
   if $interface_is_dhcp {
@@ -319,6 +332,7 @@ class contrail::vrouter (
       'DEFAULT/log_local':                          value => $log_local;
       'DEFAULT/log_file_size':                      value => $log_file_size;
       'DEFAULT/debug':                              value => bool2num($debug);
+      'DEFAULT/headless_mode':                      value => $headless_mode;
       'DISCOVERY/server':                           value => $discovery_ip;
       'DISCOVERY/max_control_nodes':                value => $vrouter_num_controllers;
       'HYPERVISOR/type':                            value => $hypervisor_type;
@@ -326,7 +340,7 @@ class contrail::vrouter (
       'VIRTUAL-HOST-INTERFACE/name':                value => 'vhost0';
       'VIRTUAL-HOST-INTERFACE/ip':                  value => "${vrouter_ip}/${vrouter_cidr}";
       'VIRTUAL-HOST-INTERFACE/gateway':             value => $vrouter_gw_orig;
-      'VIRTUAL-HOST-INTERFACE/physical_interface':  value => $vrouter_physical_interface;
+      'VIRTUAL-HOST-INTERFACE/physical_interface':  value => $vrouter_physical_interface_orig;
       'VIRTUAL-HOST-INTERFACE/compute_node_address':value => $vrouter_ip;
     }
 
