@@ -137,6 +137,10 @@
 # [*analytics_data_ttl*]
 #   How long analytics data to keep in hours. Default: 48 (2 days worth of data)
 #
+#
+# [*analytics_flow_ttl*]
+#   How long analytics flow to keep in hours. Default: Same as analytics_data_ttl (2 days worth of data)
+#
 # [*router_asn*]
 #   ASN that use in the router. Default: 64512
 #
@@ -276,6 +280,7 @@ class contrail (
   $enable_svcmon               = false,
   $cassandra_port              = 9160,
   $analytics_data_ttl          = 48,
+  $analytics_flow_ttl          = 48,
   $collector_ip                = undef,
   $router_asn                  = 64512,
   $seed                        = true,
@@ -335,6 +340,7 @@ class contrail (
   validate_re($cinder_port, '\d+')
   validate_re($nova_port, '\d+')
   validate_re($analytics_data_ttl, '\d+')
+  validate_re($analytics_flow_ttl, '\d+')
   validate_re($hc_interval, '\d+')
   validate_re($router_asn, '\d+')
   validate_re($nova_metadata_port, '\d+')
@@ -613,6 +619,7 @@ class contrail (
       api_virtual_ip       => $api_virtual_ip,
       discovery_virtual_ip => $discovery_virtual_ip,
       analytics_data_ttl   => $analytics_data_ttl,
+      analytics_flow_ttl   => $analytics_flow_ttl,
       cassandra_ip_list    => $cassandra_ip_list_orig,
       redis_ip             => $redis_ip_orig,
       cassandra_port       => $cassandra_port,

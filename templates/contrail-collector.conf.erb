@@ -6,6 +6,7 @@
 
 [DEFAULT]
   analytics_data_ttl=<%= @analytics_data_ttl %>
+  analytics_flow_ttl=<%= @analytics_flow_ttl %>
   cassandra_server_list=<%= @cassandra_ip_list.map{ |ip| "#{ip}:#{@cassandra_port}" }.join(',') %>
 # dup=0
   hostip=<%= @collector_ip %> # Resolved IP of `hostname`
