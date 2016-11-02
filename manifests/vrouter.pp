@@ -74,6 +74,7 @@ class contrail::vrouter (
   $vrouter_interface          = 'vhost0',
   $vrouter_physical_interface = 'eth0',
   $vrouter_physical_interface_backup = undef,
+  $vrouter_physical_interface_quanta = undef,
   $interface_is_dhcp          = 'true',
   $vrouter_num_controllers    = 2,
   $vrouter_gw                 = undef,
@@ -125,7 +126,9 @@ class contrail::vrouter (
     $vrouter_physical_interface_orig = $vrouter_physical_interface_backup
   } elsif has_interface_with($vrouter_physical_interface) {
     $vrouter_physical_interface_orig = $vrouter_physical_interface
-  }
+  } elsif has_interface_with($vrouter_physical_interface_quanta) {
+    $vrouter_physical_interface_orig = $vrouter_physical_interface_quanta
+  } 
 
   if has_interface_with($vrouter_interface) {
     $iface_for_vrouter_config = $vrouter_interface
@@ -133,8 +136,10 @@ class contrail::vrouter (
     $iface_for_vrouter_config = $vrouter_physical_interface
   } elsif has_interface_with($vrouter_physical_interface_backup) {
     $iface_for_vrouter_config = $vrouter_physical_interface_backup
+  } elsif has_interface_with($vrouter_physical_interface_quanta) {
+    $iface_for_vrouter_config = $vrouter_physical_interface_quanta
   } else {
-    fail("vrouter_physical_interface (${vrouter_physical_interface}) , backup interface (${vrouter_physical_interface_backup})  and vrouter_interface (${vrouter_interface}) dont exist")
+    fail("vrouter_physical_interface (${vrouter_physical_interface}) , backup interface (${vrouter_physical_interface_backup}), quanta interface (${vrouter_physical_interface_quanta})  or vrouter_interface (${vrouter_interface}) dont exist")
   }
 
   ##
